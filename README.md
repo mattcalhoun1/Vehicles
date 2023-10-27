@@ -6,16 +6,20 @@ the autonomous robots that perform various tasks (search) with the help of a "Pi
 The main vehicle is a combination of MecCar and Lookout. Together, they respond
 to commands from the Pilot, which is in a separate repo, and runs on a Raspberry Pi or Nvidia Jetson Nano.
 
-** MecCar **
+**MecCar**
+
 This is my primary vehicle at the moment. It is the host vehicle for a pilot running on a raspberry pi CM4. This sketch runs on an Arduino Due, and handles servos that control dual camera positions, receives data from a Slamtec RPLidar A1M8, and comminicates with the pilot via a serial connection. The sketch also communicates with the Lookout, via another serial connection, for pushing data to the display and monitoring for obstacles near the bumpers.
 
-** Lookout **
+**Lookout**
+
 This monitors 4 IR obstacle sensors, and also manages the vehicle display. It may perform more functions in the future, but that's it for now. It responds to commands from the MecCar via a software serial interface.
 
-** MegaTank **
+**MegaTank**
+
 This is another vehicle, which is a work in progress, based on the Arduino Mega platform.
 
-** Scanner **
+**Scanner**
+
 A simple I2C scanner for finding addresses of currently connected devices. I "borrowed" this from various sources that have exactly the same functionality. It's not directly used in any of the vehicles.
 
 ### Built With
