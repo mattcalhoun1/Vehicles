@@ -1,23 +1,22 @@
 # Vehicles
 Software for Arduino-based Robots
 
-<!-- PROJECT LOGO -->
-<br />
-<div align="center">
-  <a href="https://github.com/mattcalhoun1/Vehicles">
-    <img src="images/logo.png" alt="Logo" width="80" height="80">
-  </a>
+This is a collection of Arduino sketches to power Arduino-based vehicles. These vehicles are 
+the autonomous robots that perform various tasks (search) with the help of a "Pilot".
+The main vehicle is a combination of MecCar and Lookout. Together, they respond
+to commands from the Pilot, which is in a separate repo, and runs on a Raspberry Pi or Nvidia Jetson Nano.
 
-<h3 align="center">Vehicles</h3>
+** MecCar **
+This is my primary vehicle at the moment. It is the host vehicle for a pilot running on a raspberry pi CM4. This sketch runs on an Arduino Due, and handles servos that control dual camera positions, receives data from a Slamtec RPLidar A1M8, and comminicates with the pilot via a serial connection. The sketch also communicates with the Lookout, via another serial connection, for pushing data to the display and monitoring for obstacles near the bumpers.
 
-  <p align="center">
-    This is a collection of code to power Arduino-based vehicles. These vehicles are 
-    the autonomous robots that perform various tasks (search) with the help of a "Pilot".
-    The main vehicle is a combination of MecCar and Lookout. Together, they respond
-    to commands from the Pilot, which is in a separate repo, and runs on a Raspberry Pi or Nvidia Jetson Nano.
-  </p>
-</div>
+** Lookout **
+This monitors 4 IR obstacle sensors, and also manages the vehicle display. It may perform more functions in the future, but that's it for now. It responds to commands from the MecCar via a software serial interface.
 
+** MegaTank **
+This is another vehicle, which is a work in progress, based on the Arduino Mega platform.
+
+** Scanner **
+A simple I2C scanner for finding addresses of currently connected devices. I "borrowed" this from various sources that have exactly the same functionality. It's not directly used in any of the vehicles.
 
 ### Built With
 
@@ -28,9 +27,7 @@ Software for Arduino-based Robots
 <!-- CONTACT -->
 ## Contact
 
-Matt Calhoun [![LinkedIn][linkedin-shield]][linkedin-url]
-
-Project Link: [https://github.com/mattcalhoun1/Vehicles](https://github.com/mattcalhoun1/Vehicles)
+[Matt Calhoun](https://linkedin.com/in/matt-calhoun-74572828) - Graduate Student at Maryville University
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
