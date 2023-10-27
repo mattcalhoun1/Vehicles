@@ -29,6 +29,7 @@ Software for Arduino-based Robots
 ## Contact
 
 Matt Calhoun
+* [![LinkedIn][linkedin-shield]][linkedin-url]
 
 Project Link: [https://github.com/mattcalhoun1/Vehicles](https://github.com/mattcalhoun1/Vehicles)
 
