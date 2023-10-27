@@ -1,10 +1,11 @@
 # Vehicles
-Software for Arduino-based Robots
 
 This is a collection of Arduino sketches to power Arduino-based vehicles. These vehicles are 
 the autonomous robots that perform various tasks (search) with the help of a "Pilot".
 The main vehicle is a combination of MecCar and Lookout. Together, they respond
 to commands from the Pilot, which is in a separate repo, and runs on a Raspberry Pi or Nvidia Jetson Nano.
+
+This is part of a capstone project I am working on as part of my Master's Degree in AI at Maryville University.
 
 **MecCar**
 
