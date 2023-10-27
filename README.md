@@ -21,7 +21,7 @@ Software for Arduino-based Robots
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/github_username/repo_name">
+  <a href="https://github.com/mattcalhoun1/Vehicles">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
 
@@ -134,7 +134,7 @@ Coming soon
 <!-- LICENSE -->
 ## License
 
-Coming oson
+Coming soon
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -177,5 +177,5 @@ Project Link: [https://github.com/mattcalhoun1/Vehicles](https://github.com/matt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/matt-calhoun-74572828
 [product-screenshot]: images/screenshot.png
-[Arduino]: http://arduino.cc/en/uploads/Trademark/ArduinoCommunityLogo.png
+[Arduino.cc]: http://arduino.cc/en/uploads/Trademark/ArduinoCommunityLogo.png
 [Arduino-url]: https://www.arduino.cc/
