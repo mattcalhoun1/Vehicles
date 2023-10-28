@@ -5,8 +5,8 @@ void TestMode::init() {
 }
 
 void TestMode::loop() {
-  bool testMovement = true;
-  bool testServos = false;
+  bool testMovement = false;
+  bool testServos = true;
   bool testLookout = false;
   bool testLidar = false;
 

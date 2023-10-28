@@ -5,6 +5,7 @@
 #define COMMANDER_H
 
 #define COMMANDER_PING_FREQUENCY 500 // millis between pings
+#define COMMANDER_BAUD 115200
 
 enum CommandType {
   Stop = 0,

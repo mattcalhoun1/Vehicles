@@ -6,7 +6,7 @@
 #include "Lookout.h"
 #include "ControlMode.h"
 #include "PilotMode.h"
-//#include "TestMode.h"
+#include "TestMode.h"
 //#include "RandomMode.h"
 
 VehicleMovement movement;
@@ -19,7 +19,7 @@ ControlMode* controlMode;
 void setup() {
   Serial.begin(9600);
   Serial.flush();
-  Serial2.begin(9600);
+  Serial2.begin(COMMANDER_BAUD);
   Serial2.flush();
 
   logConsole("Starting...");
@@ -56,6 +56,7 @@ ControlMode* getControlMode () {
   if (!controlMode) {
     // Chose a control mode
     controlMode = new PilotMode(lookout, obstructions, &movement, &servos, &commander);
+    //controlMode = new TestMode(lookout, obstructions, &movement, &servos, &commander);
     controlMode->init();
   }
   return controlMode;
