@@ -36,13 +36,13 @@ void VehicleServos::init (int startingRotations[], int startingTilts[]) {
   vehicleRelativeMin[0] = -140;
   tiltMin[0] = 20;
   tiltMax[0] = 140;
-  tiltAdjust[0] = -5;
+  tiltAdjust[0] = -8;
   mountPositions[0] = CAM_MOUNT_LEFT;
 
   // front right
   channelsRotation[1] = 2;
   channelsTilt[1] = 3;
-  vehicleFore[1] = 176;
+  vehicleFore[1] = 174;
   vehicleAft[1] = 25;
   vehicleRelativeMax[1] = 140;
   vehicleRelativeMin[1] = 0;

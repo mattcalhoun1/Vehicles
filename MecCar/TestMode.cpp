@@ -38,28 +38,24 @@ void TestMode::loop() {
 
   if (testServos) {
     lookout->showStatus(STR_STATUS_TEST_SERVOS);
-    logConsole(STR_STATUS_TEST_SERVOS);
-    for (int cam = 0; cam < 2; cam++) {
-      //commander.log("getting vehicle rotation for cam " + String(cam));
-      int nextAngle = servos->getVehicleRelativeRotation(cam);
-      logConsole(String(cam) + ": " + String(nextAngle));
-      if (directionsForward[cam]) {
-        nextAngle += 25;
-        if (nextAngle > maxRotations[cam]) {
-          nextAngle = maxRotations[cam] - 25;
-          directionsForward[cam] = !directionsForward[cam];
-        }
-      }
-      else {
-        nextAngle -= 25;
-        if (nextAngle < minRotations[cam]) {
-          nextAngle = minRotations[cam] + 25;
-          directionsForward[cam] = !directionsForward[cam];
-        }
-      }
-      servos->setVehicleRelativeRotation(nextAngle, cam);
-      sleepOrBackground(1000);
+
+    // Go to each pilot-preferred location, pausing at each
+    int wantedRotations[4] = {10, 33, 90, 140};
+    for (int r = 0; r < 4; r++) {
+        int rightCam = servos->getCameraFor(wantedRotations[r], 90);
+        servos->setVehicleRelativeRotation(wantedRotations[r], rightCam);
+        logConsole(String(rightCam) + ": " + String(wantedRotations[r]));
+
+        int leftCam = servos->getCameraFor(-1 * wantedRotations[r], 90);
+        servos->setVehicleRelativeRotation(-1 * wantedRotations[r], leftCam);
+        logConsole(String(leftCam) + ": " + String(-1 * wantedRotations[r]));
+        sleepOrBackground(5000);
     }
+
+    // back to 0
+    servos->setVehicleRelativeRotation(0, 0);
+    servos->setVehicleRelativeRotation(0, 1);
+    sleepOrBackground(5000);
   }
 
   if (testLidar) {
@@ -72,11 +68,6 @@ void TestMode::loop() {
     if (frontMeas.distance > 0.0) {
       lookout->showObstruction(String(frontMeas.angle), (int)frontMeas.distance);
     }
-
-    /*Measurement rearMeas = obstructions->getClosestObstruction(175.0, 185.0, lidarObstructionThreshold);
-    if (rearMeas.distance > 0.0) {
-      lookout->showObstruction(String(rearMeas.angle), (int)rearMeas.distance);
-    }*/
   }
 
   if (testMovement) {

@@ -42,7 +42,7 @@ void VehicleServos::init (int startingRotations[], int startingTilts[]) {
   // front right
   channelsRotation[1] = 2;
   channelsTilt[1] = 3;
-  vehicleFore[1] = 175;
+  vehicleFore[1] = 174;
   vehicleAft[1] = 25;
   vehicleRelativeMax[1] = 170;
   vehicleRelativeMin[1] = 0;
