@@ -158,6 +158,10 @@ void Commander::sendMap(int heading, float* lidarMap, int numMeasurements) {
   sendPing();
   Serial2.print("Map:");
   for (int m = 0; m < numMeasurements; m++) {
+    while (Serial2.availableForWrite() < 10) {
+      delay(10); // wait for space in serial buffer
+    }
+
     Serial2.print(lidarMap[m]);
     if (m+1 < numMeasurements) {
       Serial2.print("|");
