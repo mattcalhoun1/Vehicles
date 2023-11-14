@@ -8,8 +8,7 @@ Command Commander::getNextCommand () {
 Command Commander::receiveCommand () {
   // If there is room in the queue, check for another command
   if (Serial2.available() > 0) {
-    // read the incoming byte:
-    String command = Serial2.readString();
+    String command = Serial2.readStringUntil(COMMAND_DELIMITER);
     String params = "";
     int delim = command.indexOf(':');
 

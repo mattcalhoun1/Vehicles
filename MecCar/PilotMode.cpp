@@ -75,6 +75,8 @@ void PilotMode::loop () {
 }
 
 void PilotMode::sendLidarMap (Command cmd) {
+  logConsole("Send liar map...");
+
   // only update display with command if it isn't an automatic stream
   if (cmd.getCommandType() != Nothing) {
     lookout->showCommand(STR_COMMAND_MAP);

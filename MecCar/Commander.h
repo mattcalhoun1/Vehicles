@@ -7,6 +7,8 @@
 #define COMMANDER_PING_FREQUENCY 500 // millis between pings
 #define COMMANDER_BAUD 115200
 
+#define COMMAND_DELIMITER '\n' // delimiter between serial commands
+
 enum CommandType {
   Stop = 0,
   Go = 1,

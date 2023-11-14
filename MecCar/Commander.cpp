@@ -8,8 +8,7 @@ Command Commander::getNextCommand () {
 Command Commander::receiveCommand () {
   // If there is room in the queue, check for another command
   if (Serial2.available() > 0) {
-    // read the incoming byte:
-    String command = Serial2.readString();
+    String command = Serial2.readStringUntil(COMMAND_DELIMITER);
     String params = "";
     int delim = command.indexOf(':');
 
@@ -154,6 +153,8 @@ void Commander::sendMeasurement(float angle, float measurement) {
 }
 
 void Commander::sendMap(int heading, float* lidarMap, int numMeasurements) {
+  logConsole("Sending lidar map");
+
   sendPing();
   Serial2.print("Map:");
   for (int m = 0; m < numMeasurements; m++) {
@@ -163,6 +164,8 @@ void Commander::sendMap(int heading, float* lidarMap, int numMeasurements) {
     }
   }
   Serial2.print("\n");
+
+  logConsole("Lidar map sent.");
 }
 
 void Commander::sendConfig(String key, String val) {

@@ -6,9 +6,9 @@ void TestMode::init() {
 
 void TestMode::loop() {
   bool testMovement = false;
-  bool testServos = true;
+  bool testServos = false;
   bool testLookout = false;
-  bool testLidar = false;
+  bool testLidar = true;
 
   if (testLookout) {
     logConsole(STR_STATUS_TEST_LOOKOUT);
@@ -68,6 +68,9 @@ void TestMode::loop() {
     if (frontMeas.distance > 0.0) {
       lookout->showObstruction(String(frontMeas.angle), (int)frontMeas.distance);
     }
+
+    int numMeasurements = obstructions->getNumMeasurements();
+    logConsole("Lidar Map contains " + String(numMeasurements) + " measurements");
   }
 
   if (testMovement) {

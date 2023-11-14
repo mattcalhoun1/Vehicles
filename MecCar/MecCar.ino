@@ -52,8 +52,8 @@ void loop () {
 }
 
 ControlMode* getControlMode () {
-  logConsole("Getting control mode");
   if (!controlMode) {
+    logConsole("Getting control mode");
     // Chose a control mode
     controlMode = new PilotMode(lookout, obstructions, &movement, &servos, &commander);
     //controlMode = new TestMode(lookout, obstructions, &movement, &servos, &commander);
