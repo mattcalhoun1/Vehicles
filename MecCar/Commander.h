@@ -8,6 +8,7 @@
 #define COMMANDER_BAUD 115200
 
 #define COMMAND_DELIMITER '\n' // delimiter between serial commands
+#define COMMAND_MIN_BUFFER_FREE 64 // min bytes that shoudl be free in the serial buffer before we write lidar data (which is big)
 
 enum CommandType {
   Stop = 0,

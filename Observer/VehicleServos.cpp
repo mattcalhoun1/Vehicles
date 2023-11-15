@@ -8,30 +8,15 @@ void VehicleServos::init (int startingRotations[], int startingTilts[]) {
 
   //servoDriver.setOscillatorFrequency(27000000);
   servoDriver.begin();
-  /*
-   * In theory the internal oscillator (clock) is 25MHz but it really isn't
-   * that precise. You can 'calibrate' this by tweaking this number until
-   * you get the PWM update frequency you're expecting!
-   * The int.osc. for the PCA9685 chip is a range between about 23-27MHz and
-   * is used for calculating things like writeMicroseconds()
-   * Analog servos run at ~50 Hz updates, It is importaint to use an
-   * oscilloscope in setting the int.osc frequency for the I2C PCA9685 chip.
-   * 1) Attach the oscilloscope to one of the PWM signal pins and ground on
-   *    the I2C PCA9685 chip you are setting the value for.
-   * 2) Adjust setOscillatorFrequency() until the PWM update frequency is the
-   *    expected value (50Hz for most ESCs)
-   * Setting the value here is specific to each individual I2C PCA9685 chip and
-   * affects the calculations for the PWM update frequency. 
-   * Failure to correctly set the int.osc value will cause unexpected PWM results
-   */
+
   //servoDriver.setOscillatorFrequency(27000000);
   servoDriver.setPWMFreq(200);  // Analog servos run at ~50 Hz updates
 
   // front left
   channelsRotation[0] = 0;
   channelsTilt[0] = 1;
-  vehicleFore[0] = 25;
-  vehicleAft[0] = 179;
+  vehicleFore[0] = 26;
+  vehicleAft[0] = 182;
   vehicleRelativeMax[0] = 0;
   vehicleRelativeMin[0] = -170;
   tiltMin[0] = 20;
@@ -42,8 +27,8 @@ void VehicleServos::init (int startingRotations[], int startingTilts[]) {
   // front right
   channelsRotation[1] = 2;
   channelsTilt[1] = 3;
-  vehicleFore[1] = 174;
-  vehicleAft[1] = 25;
+  vehicleFore[1] = 176;
+  vehicleAft[1] = 27;
   vehicleRelativeMax[1] = 170;
   vehicleRelativeMin[1] = 0;
   tiltMin[1] = 20;
