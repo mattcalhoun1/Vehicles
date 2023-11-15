@@ -13,7 +13,7 @@
 
 #define LD_FULL_CYCLE_TIME 6000 // how long to allow lidar to refill measurement array / drop old measurements
 
-#define ACTIVE_MOVEMENT_CYCLE_TIME 100 // break forward/reverse movements into chunks of this size for good measurements
+#define ACTIVE_MOVEMENT_CYCLE_TIME 200 // break forward/reverse movements into chunks of this size for good measurements
 #define ACTIVE_STRAFE_CYCLE_TIME 2000 // break strafe movements into chunks of this size for good measurements
 
 #define STR_STATUS_MEASURING "Measuring"

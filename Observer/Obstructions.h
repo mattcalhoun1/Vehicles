@@ -12,6 +12,7 @@
 #define RPLIDAR_NUM_MEASUREMENTS 1461 // if this is changed, calculations that assume .5 increments may need changed
 #define RPLIDAR_MEAS_INCREMENT 0.25 // if # measurements above is changed, this should also be changed to match up
 
+#define RPLIDAR_MEAS_AUTO_PRUNE false // whether pruning should happen during measurement collection
 #define RPLIDAR_MEAS_EXPIRE_MILLIS 6000 // how long (minimum) a measurement can exist before being pruned.
 
 #define RPLIDAR_MIN_DISTANCE 200.0 // ignore any measurements less than this
@@ -35,17 +36,17 @@ public:
   Measurement getDistance(float angle, float angleTolerance, unsigned long maxAge);
   Measurement getDistanceInRange (float angle, float angleTolerance, float expectedDistance, float distanceTolerance, unsigned long maxAge);
   void collectMeasurements(unsigned long timeoutMillis);
-  Measurement getClosestObstruction(float startAngle, float endAngle, float obstructionDistanceThreshold);
+  Measurement getClosestObstruction(float startAngle, float endAngle, float obstructionDistanceThreshold, unsigned long maxAge);
   int getLidarHeading ();
   float* getDistances();
   int getNumMeasurements();
   float getMeasurementsIncrement();
+  void pruneMeasurements(unsigned int maxMeasurementAge);
 
 private:
   RPLidar lidar;
   float lidarMeasurements[RPLIDAR_NUM_MEASUREMENTS];
   unsigned long lidarTimes[RPLIDAR_NUM_MEASUREMENTS];
-  void pruneMeasurements();
   Measurement getClosestObstructionRangeLimited(float scanStart, float scanEnd, float obstructionDistanceThreshold);
   int getLidarIndex(float angle);
   int getRelativeLidarIndex(float angle);

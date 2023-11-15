@@ -13,8 +13,10 @@ void Obstructions::init()
 }
 
 // Returns distance to the closest obstruction within the given range
-Measurement Obstructions::getClosestObstruction(float startAngle, float endAngle, float obstructionDistanceThreshold)
+Measurement Obstructions::getClosestObstruction(float startAngle, float endAngle, float obstructionDistanceThreshold, unsigned long maxAge)
 {
+  pruneMeasurements(maxAge);
+  
   // make sure lidar is running
   collectMeasurements(100);
 
@@ -122,11 +124,11 @@ Measurement Obstructions::getDistanceInRange(float angle, float angleTolerance, 
 }
 
 // Cleans expired measuremnts (sets them to -1)
-void Obstructions::pruneMeasurements()
+void Obstructions::pruneMeasurements(unsigned int maxMeasurementAge)
 {
   unsigned long now = millis();
   for (int m = 0; m < RPLIDAR_NUM_MEASUREMENTS; m++) {
-    if (lidarTimes[m] < (now - RPLIDAR_MEAS_EXPIRE_MILLIS)) {
+    if (lidarTimes[m] < (now - maxMeasurementAge)) {
       lidarMeasurements[m] = -1;
       lidarTimes[m] = -1;
     }
@@ -171,7 +173,9 @@ void Obstructions::collectMeasurements(unsigned long timeoutMillis)
   }
 
   // clear old measurements (doesn't count toward time limit)
-  pruneMeasurements();
+  if (RPLIDAR_MEAS_AUTO_PRUNE) {
+    pruneMeasurements(RPLIDAR_MEAS_EXPIRE_MILLIS);
+  }
 }
 
 int Obstructions::getLidarHeading()

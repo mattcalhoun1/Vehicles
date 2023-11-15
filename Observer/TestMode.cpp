@@ -37,12 +37,12 @@ void TestMode::loop() {
 
     sleepOrBackground(LD_FULL_CYCLE_TIME);
 
-    Measurement frontMeas = obstructions->getClosestObstruction(355.0, 5.0, LD_OBSTRUCTION_THRESHOLD);
+    Measurement frontMeas = obstructions->getClosestObstruction(355.0, 5.0, LD_OBSTRUCTION_THRESHOLD, LD_FULL_CYCLE_TIME);
     if (frontMeas.distance > 0.0) {
       display->showObstruction(String(frontMeas.angle), (int)frontMeas.distance);
     }
 
-    Measurement rearMeas = obstructions->getClosestObstruction(175.0, 185.0, LD_OBSTRUCTION_THRESHOLD);
+    Measurement rearMeas = obstructions->getClosestObstruction(175.0, 185.0, LD_OBSTRUCTION_THRESHOLD, LD_FULL_CYCLE_TIME);
     if (rearMeas.distance > 0.0) {
       display->showObstruction(String(rearMeas.angle), (int)rearMeas.distance);
     }

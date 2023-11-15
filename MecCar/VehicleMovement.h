@@ -5,7 +5,7 @@
 
 #ifndef VEHICLE_MOVEMENT_H
 #define VEHICLE_MOVEMENT_H
-#define DRIVE_READ_DELAY 100 //can only read digital temp sensor every ~750ms
+#define DRIVE_READ_DELAY 100 // how often to check sensors while driving
 
 #define DRIVE_KP 0.05 //.12
 #define DRIVE_KI 25 //.0003

@@ -33,7 +33,7 @@ bool ControlMode::isObstructed () {
     return true;
   }
 
-  Measurement closestLidarObst = obstructions->getClosestObstruction(360.0 - 25.0, 25.0, LD_OBSTRUCTION_THRESHOLD);
+  Measurement closestLidarObst = obstructions->getClosestObstruction(360.0 - 25.0, 25.0, LD_OBSTRUCTION_THRESHOLD, ACTIVE_MOVEMENT_CYCLE_TIME);
   bool lidarObstructed = closestLidarObst.distance > -1.0 && closestLidarObst.distance <= LD_OBSTRUCTION_THRESHOLD;
 
   if (lidarObstructed) {
@@ -64,7 +64,7 @@ bool ControlMode::isRearObstructed () {
     return true;
   }
 
-  Measurement closestLidarObst = obstructions->getClosestObstruction(180.0 - 25.0, 180.0 + 25.0, LD_OBSTRUCTION_THRESHOLD);
+  Measurement closestLidarObst = obstructions->getClosestObstruction(180.0 - 25.0, 180.0 + 25.0, LD_OBSTRUCTION_THRESHOLD, ACTIVE_MOVEMENT_CYCLE_TIME);
   bool lidarObstructed = closestLidarObst.distance > -1.0 && closestLidarObst.distance <= LD_OBSTRUCTION_THRESHOLD;
 
   if (lidarObstructed) {
@@ -107,7 +107,7 @@ bool ControlMode::isStrafeObstructed (StrafeDirection direction) {
       break;
   }  
 
-  Measurement closestLidarObst = obstructions->getClosestObstruction(scanStart, scanEnd, US_OBSTRUCTION_THRESHOLD);
+  Measurement closestLidarObst = obstructions->getClosestObstruction(scanStart, scanEnd, US_OBSTRUCTION_THRESHOLD, ACTIVE_MOVEMENT_CYCLE_TIME);
   bool lidarObstructed = closestLidarObst.distance > -1.0;
 
   if (lidarObstructed) {

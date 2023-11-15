@@ -75,14 +75,19 @@ void PilotMode::loop () {
 }
 
 void PilotMode::sendLidarMap (Command cmd) {
-  logConsole("Send liar map...");
-
   // only update display with command if it isn't an automatic stream
   if (cmd.getCommandType() != Nothing) {
     lookout->showCommand(STR_COMMAND_MAP);
   }
 
   lastLidarUpdate = millis();
+
+  // prune the measurements
+  int maxMeasurementAge = RPLIDAR_MEAS_EXPIRE_MILLIS;
+  if (!cmd.getParams().equalsIgnoreCase("none")) {
+    maxMeasurementAge = cmd.getParams().toInt();
+  }
+  obstructions->pruneMeasurements(maxMeasurementAge);
 
   float* lidarMap = obstructions->getDistances();
 

@@ -65,6 +65,13 @@ void PilotMode::sendLidarMap (Command cmd) {
 
   lastLidarUpdate = millis();
 
+  // prune the measurements
+  unsigned int maxMeasurementAge = RPLIDAR_MEAS_EXPIRE_MILLIS;
+  if (!cmd.getParams().equalsIgnoreCase("none")) {
+    maxMeasurementAge = cmd.getParams().toInt();
+  }
+  obstructions->pruneMeasurements(maxMeasurementAge);
+
   float* lidarMap = obstructions->getDistances();
 
   if (cmd.getCommandType() != Nothing) {
