@@ -202,6 +202,9 @@ void VehicleMovement::rotate (float degrees) {
   bool rightRotationForward = degrees < 0; // right side will go forward if rotating left
   unsigned long rotationSpeed = motors[0].OutputMax; // pick a random motor, its max will be our output to all wheels
 
+  unsigned long firstWheelPulses = pulseCount[0];
+  unsigned long lastWheelPulses = pulseCount[WHEEL_COUNT - 1];
+
   for (int wheel = 0; wheel < WHEEL_COUNT; wheel++) {
     if (motors[wheel].WheelSide == SIDE_LEFT) {
       // If we are rotating right, this motor should go forward
@@ -215,6 +218,12 @@ void VehicleMovement::rotate (float degrees) {
     }
     analogWrite(motors[wheel].EncoderPinOut, rotationSpeed);
   }
+  // Wait until all wheels have started moving
+  while (pulseCount[0] == firstWheelPulses || pulseCount[WHEEL_COUNT - 1] == lastWheelPulses) {
+    delay(20);
+  }
+
+  // Now allow the rotation to continue for the given time
   delay(rotationTime);
 
   stop();
