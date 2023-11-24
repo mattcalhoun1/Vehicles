@@ -151,6 +151,9 @@ void VehicleMovement::strafe (StrafeDirection direction, unsigned long durationM
       break;
   }  
 
+  unsigned long firstWheelPulses = pulseCount[0];
+  unsigned long lastWheelPulses = pulseCount[WHEEL_COUNT - 1];
+
 	digitalWrite(motors[LEFT_FRONT].OutputPin1, fl_forward ? HIGH : LOW);
 	digitalWrite(motors[LEFT_FRONT].OutputPin2, fl_forward ? LOW : HIGH);
 	digitalWrite(motors[LEFT_REAR].OutputPin1, rl_forward ? HIGH : LOW);
@@ -160,14 +163,18 @@ void VehicleMovement::strafe (StrafeDirection direction, unsigned long durationM
 	digitalWrite(motors[RIGHT_REAR].OutputPin1, rr_forward ? HIGH : LOW);
 	digitalWrite(motors[RIGHT_REAR].OutputPin2, rr_forward ? LOW : HIGH);
 
-  unsigned long start = millis();
-
   analogWrite(motors[LEFT_FRONT].EncoderPinOut, STRAFE_MOTOR_OUTPUT);  
   analogWrite(motors[RIGHT_FRONT].EncoderPinOut, STRAFE_MOTOR_OUTPUT);  
   analogWrite(motors[LEFT_REAR].EncoderPinOut, STRAFE_MOTOR_OUTPUT);  
   analogWrite(motors[RIGHT_REAR].EncoderPinOut, STRAFE_MOTOR_OUTPUT);  
 
-  // wait for allotted time to pass
+  // Wait until all wheels have started moving
+  while (pulseCount[0] == firstWheelPulses || pulseCount[WHEEL_COUNT - 1] == lastWheelPulses) {
+    delay(20);
+  }
+
+  // strafe for given time
+  unsigned long start = millis();
   while(millis() - start < durationMillis) {
     delay(20);
   }
