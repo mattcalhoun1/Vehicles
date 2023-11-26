@@ -9,7 +9,7 @@ VehicleMovement::VehicleMovement () {
   motors[LEFT_REAR].GearRatio = 30; // was 150
   motors[LEFT_REAR].TrackLength = 23.0;
   motors[LEFT_REAR].DriveWheelDiameter = 3.75;
-  motors[LEFT_REAR].PulsesPerRevolution = 3;
+  motors[LEFT_REAR].PulsesPerRevolution = 2;
   motors[LEFT_REAR].OutputMin = MIN_MOTOR_OUTPUT;
   motors[LEFT_REAR].OutputMax = MAX_MOTOR_OUTPUT; // up to 255
   motors[LEFT_REAR].WheelRow = 1; // secnd row
@@ -23,7 +23,7 @@ VehicleMovement::VehicleMovement () {
   motors[RIGHT_REAR].GearRatio = 30;
   motors[RIGHT_REAR].TrackLength = 23.0;
   motors[RIGHT_REAR].DriveWheelDiameter = 3.75;
-  motors[RIGHT_REAR].PulsesPerRevolution = 3;
+  motors[RIGHT_REAR].PulsesPerRevolution = 2;
   motors[RIGHT_REAR].OutputMin = MIN_MOTOR_OUTPUT;
   motors[RIGHT_REAR].OutputMax = MAX_MOTOR_OUTPUT;
   motors[RIGHT_REAR].WheelRow = 1; // second row
@@ -37,7 +37,7 @@ VehicleMovement::VehicleMovement () {
   motors[LEFT_FRONT].GearRatio = 30;
   motors[LEFT_FRONT].TrackLength = 23.0;
   motors[LEFT_FRONT].DriveWheelDiameter = 3.75;
-  motors[LEFT_FRONT].PulsesPerRevolution = 3;
+  motors[LEFT_FRONT].PulsesPerRevolution = 2;
   motors[LEFT_FRONT].OutputMin = MIN_MOTOR_OUTPUT;
   motors[LEFT_FRONT].OutputMax = MAX_MOTOR_OUTPUT;
   motors[LEFT_FRONT].WheelRow = 0; // first row
@@ -51,7 +51,7 @@ VehicleMovement::VehicleMovement () {
   motors[RIGHT_FRONT].GearRatio = 30;
   motors[RIGHT_FRONT].TrackLength = 23.0;
   motors[RIGHT_FRONT].DriveWheelDiameter = 3.75;
-  motors[RIGHT_FRONT].PulsesPerRevolution = 3;
+  motors[RIGHT_FRONT].PulsesPerRevolution = 2;
   motors[RIGHT_FRONT].OutputMin = MIN_MOTOR_OUTPUT;
   motors[RIGHT_FRONT].OutputMax = MAX_MOTOR_OUTPUT;
   motors[RIGHT_FRONT].WheelRow = 0; // first row
@@ -203,20 +203,19 @@ void VehicleMovement::setDirectionSpeed (bool forward, float inchesPerSecond) {
 
 void VehicleMovement::rotate (float degrees) {
   stop();
+  updateSpeeds(); // update trip meter
+  resetPulses();
 
-  float pulsesPerDegree = 0.7;
+  float pulsesPerDegree = 0.85;
   unsigned long expectedPulses = abs(degrees / pulsesPerDegree);
 
-
-  //unsigned long rotationTime = abs(int(degrees / 90)) * 1000; // assumes rotates 90 degrees per second
   bool leftRotationForward = degrees > 0; // left side will go forward if rotating right
   bool rightRotationForward = degrees < 0; // right side will go forward if rotating left
   unsigned long rotationSpeed = motors[0].OutputMax; // pick a random motor, its max will be our output to all wheels
 
-  unsigned long firstWheelPulses = pulseCount[0];
-  unsigned long lastWheelPulses = pulseCount[WHEEL_COUNT - 1];
-
+  unsigned long beginPulses[WHEEL_COUNT];
   for (int wheel = 0; wheel < WHEEL_COUNT; wheel++) {
+    beginPulses[wheel] = pulseCount[wheel];
     if (motors[wheel].WheelSide == SIDE_LEFT) {
       // If we are rotating right, this motor should go forward
       digitalWrite(motors[wheel].OutputPin1, leftRotationForward ? HIGH : LOW);
@@ -230,23 +229,25 @@ void VehicleMovement::rotate (float degrees) {
     analogWrite(motors[wheel].EncoderPinOut, rotationSpeed);
   }
 
-  /*
-  // Wait until all wheels have started moving
-  while (pulseCount[0] == firstWheelPulses || pulseCount[WHEEL_COUNT - 1] == lastWheelPulses) {
-    delay(20);
-  }
-  // Now allow the rotation to continue for the given time
-  delay(rotationTime);
-  */
+  // wait until the correct number of pulses has happened. this is not exact
+  bool doneRotating = false;
+  while (!doneRotating) {
+    unsigned long fullPulses = 0;
+    for (int w = 0; w < WHEEL_COUNT; w++) {
+      fullPulses += abs(abs(pulseCount[w]) - abs(beginPulses[w]));
+    }
 
-  // wait until the correct number of pulses has happened
-  while (expectedPulses > (abs(pulseCount[0] - firstWheelPulses))) {
-    delay(10);
+    if((fullPulses / WHEEL_COUNT) >= expectedPulses) {
+      doneRotating = true;
+    }
+    else {
+      delay(10);
+    }
   }
-
 
   stop();
 }
+
 
 void VehicleMovement::stop() {
   for (int wheel = 0; wheel < WHEEL_COUNT; wheel++) {

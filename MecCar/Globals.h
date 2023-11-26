@@ -2,7 +2,7 @@
 
 #define MCGLOBALS_H
 
-#define LOG_ENABLED false
+#define LOG_ENABLED true
 
 #define STR_MODE_RANDOM "Random"
 #define STR_MODE_PILOT "Pilot"

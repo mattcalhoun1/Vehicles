@@ -5,10 +5,10 @@ void TestMode::init() {
 }
 
 void TestMode::loop() {
-  bool testMovement = false;
+  bool testMovement = true;
   bool testServos = false;
   bool testLookout = false;
-  bool testLidar = true;
+  bool testLidar = false;
 
   if (testLookout) {
     logConsole(STR_STATUS_TEST_LOOKOUT);
@@ -77,6 +77,7 @@ void TestMode::loop() {
     lookout->showStatus(STR_STATUS_TEST_MOVEMENT);
     movement->resetPulses();
 
+    /*
     // Set the direction forward
     logConsole(STR_STATUS_GO_FORWARD);
     movement->setDirectionSpeed(true, 15.0);
@@ -108,19 +109,35 @@ void TestMode::loop() {
     // Check the distance
     logConsole(String(movement->getDistanceTraveled()));
     movement->resetTripMeter();
+    */
+
+    // Rotate -45
+    logConsole(STR_STATUS_ROTATE_L);
+    movement->rotate(-45.0);
+
+    sleepOrBackground(5000);
+
+    // rotate +45
+    logConsole(STR_STATUS_ROTATE_R);
+    movement->rotate(45.0);
+    sleepOrBackground(5000);
+
 
     // Rotate -90
     logConsole(STR_STATUS_ROTATE_L);
     movement->rotate(-90.0);
 
-    sleepOrBackground(1000);
+    sleepOrBackground(5000);
 
     // rotate +90
     logConsole(STR_STATUS_ROTATE_R);
     movement->rotate(90.0);
+    sleepOrBackground(5000);
+
+
   }
 
-  sleepOrBackground(1000);
+  sleepOrBackground(5000);
 }
 
 bool TestMode::runLidar () {
