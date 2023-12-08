@@ -16,4 +16,12 @@ class TestMode : public ControlMode {
     int minRotations[2] = {-140,0};
     int maxRotations[2] = {0,140};
     bool directionsForward[2] = {false,true};
+    String getAngleName (float angle);
+    bool isSomethingNear ();
+    void checkIfLidarClear (bool sleepUntilClear);
+
+    void testServos (bool stopIfObstructed);
+    void testMovement (bool stopIfObstructed);
+    void testLookout ();
+    void testLidar ();
 };
