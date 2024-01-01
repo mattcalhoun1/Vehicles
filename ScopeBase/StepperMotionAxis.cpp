@@ -1,6 +1,6 @@
 #include "StepperMotionAxis.h"
 
-StepperMotionAxis::StepperMotionAxis (String axisId, int directionPin, int pulsePin, int stepsPerRev, float mmPerRev, float axisScaler, int lowerLimitSwitchPin, int upperLimitSwitchPin) {
+StepperMotionAxis::StepperMotionAxis (String axisId, int directionPin, int pulsePin, int stepsPerRev, float mmPerRev, float axisScaler, int lowerLimitSwitchPin, int upperLimitSwitchPin, int slowSpeed, int mediumSpeed, int fastSpeed) {
   stepper = new Stepper(stepsPerRev, pulsePin, directionPin);
   stepper->setSpeed(getSpeedValue(defaultSpeed));
   
@@ -10,6 +10,9 @@ StepperMotionAxis::StepperMotionAxis (String axisId, int directionPin, int pulse
   this->axisScaler = axisScaler;
   this->lowerLimitSwitchPin = lowerLimitSwitchPin;
   this->upperLimitSwitchPin = upperLimitSwitchPin;
+  this->stepperSlow = slowSpeed;
+  this->stepperMedium = mediumSpeed;
+  this->stepperFast = fastSpeed;
 }
 
 float StepperMotionAxis::getPosition () {
@@ -34,13 +37,13 @@ void StepperMotionAxis::goToPosition (float position, AxisSpeed speed) {
 int StepperMotionAxis::getSpeedValue (AxisSpeed speed) {
   switch(speed) {
     case AXIS_SPEED_SLOW:
-      return STEPPER_X_SLOW_SPEED;
+      return this->stepperSlow;
     case AXIS_SPEED_MEDIUM:
-      return STEPPER_X_MEDIUM_SPEED;
+      return this->stepperMedium;
     case AXIS_SPEED_FAST:
-      return STEPPER_X_FAST_SPEED;
+      return this->stepperFast;
     default:
-      return STEPPER_X_SLOW_SPEED;
+      return this->stepperSlow;
   }
 }
 
@@ -79,26 +82,42 @@ void StepperMotionAxis::move (float scaledAmount, AxisSpeed speed) {
 void StepperMotionAxis::calibrate () {
 
   writeLog("Calibrating");
-  stepper->setSpeed(getSpeedValue(AXIS_SPEED_SLOW));
+  stepper->setSpeed(getSpeedValue(AXIS_SPEED_MEDIUM));
 
 
   writeLog("Finding upper limit");
-  while(digitalRead(upperLimitSwitchPin) != LOW) {
+  bool upperFound = false;
+  while(!upperFound) {
     delay(10);
     stepper->step(stepsPerRev * smallStepSizeScaled);
+    // check if the limit switch is closed
+    if (digitalRead(upperLimitSwitchPin) == LOW) {
+      // wait and check again. occasionally get false reading
+      delay(100);
+      upperFound = digitalRead(upperLimitSwitchPin) == LOW;
+    }
   }
   maxPosition = 0.0; // this will be calculated while finding lower limit
   writeLog("Upper limit found");
 
 
   writeLog("Finding lower limit");
-  int stepCount = 0;
-  while(digitalRead(lowerLimitSwitchPin) != LOW) {
+  bool lowerFound = false;
+  //int stepCount = 0;
+  while(!lowerFound) {
     delay(10);
     stepper->step(-1 * stepsPerRev * smallStepSizeScaled);
-    writeLog("Step count " + String(stepCount) + ", Stepping " + String(-1 * stepsPerRev * smallStepSizeScaled) + ", pre max amount: " + String(maxPosition));
+    //writeLog("Step count " + String(stepCount) + ", Stepping " + String(-1 * stepsPerRev * smallStepSizeScaled) + ", pre max amount: " + String(maxPosition));
     maxPosition += (smallStepSizeScaled * mmPerRev);
-    stepCount++;
+
+    // check if the limit switch is closed
+    if (digitalRead(lowerLimitSwitchPin) == LOW) {
+      // wait and check again. occasionally get false reading
+      delay(100);
+      lowerFound = digitalRead(lowerLimitSwitchPin) == LOW;
+
+    }
+    //stepCount++;
   }
   currentPosition = 0;
 

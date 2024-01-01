@@ -8,7 +8,7 @@
 
 class StepperMotionAxis : MotionAxis {
   public:
-    StepperMotionAxis (String axisId, int directionPin, int pulsePin, int stepsPerRev, float mmPerRev, float axisScaler, int lowerLimitSwitchPin, int upperLimitSwitchPin);
+    StepperMotionAxis (String axisId, int directionPin, int pulsePin, int stepsPerRev, float mmPerRev, float axisScaler, int lowerLimitSwitchPin, int upperLimitSwitchPin, int slowSpeed, int mediumSpeed, int fastSpeed);
     virtual void goToPosition (float position, AxisSpeed speed);
     virtual void move (float scaledAmount, AxisSpeed speed);
     virtual void calibrate ();
@@ -25,6 +25,10 @@ class StepperMotionAxis : MotionAxis {
     int smallStepSizeScaled = STEPPER_SMALL_STEP_SIZE_SCALED;
     int lowerLimitSwitchPin;
     int upperLimitSwitchPin;
+
+    int stepperSlow;
+    int stepperMedium;
+    int stepperFast;
 
     // must be calibrated before these are accurate
     float currentPosition = 0.0; 
