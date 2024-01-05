@@ -58,7 +58,8 @@ class CameraServos {
     int tiltMax[NUM_CAMERAS];
     int tiltMin[NUM_CAMERAS];
     int tiltAdjust[NUM_CAMERAS];
-
+    int rotationAdjust[NUM_CAMERAS];
+    
     CameraMountPosition mountPositions[NUM_CAMERAS];
     int getPulseWidth(int angle, int servoMinAngle, int servoMaxAngle);
 };

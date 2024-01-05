@@ -22,7 +22,8 @@ void CameraServos::init (int startingRotations[], int startingTilts[]) {
   frameRelativeMin[0] = 0;
   tiltMin[0] = 20;
   tiltMax[0] = 140;
-  tiltAdjust[0] = 0;// 9;
+  tiltAdjust[0] = -1;// 9;
+  rotationAdjust[0] = 6;
   mountPositions[0] = CAM_MOUNT_LEFT;
 
   // front right
@@ -35,7 +36,8 @@ void CameraServos::init (int startingRotations[], int startingTilts[]) {
   frameRelativeMin[1] = 20;
   tiltMin[1] = 20;
   tiltMax[1] = 140;
-  tiltAdjust[1] = 0;//-11;
+  tiltAdjust[1] = 4;//-11;
+  rotationAdjust[1] = -3;
   mountPositions[1] = CAM_MOUNT_RIGHT;
 
   // set the default angles
@@ -119,7 +121,7 @@ int CameraServos::getFrameRelativeRotation (int cameraNum) {
 }
 
 void CameraServos::setCameraRotation(int angle, int cameraNum) {
-  int newPulseWidth = getPulseWidth(angle, CAM_SERVO_MIN_ROTATION, CAM_SERVO_MAX_ROTATION);
+  int newPulseWidth = getPulseWidth(angle + rotationAdjust[cameraNum], CAM_SERVO_MIN_ROTATION, CAM_SERVO_MAX_ROTATION);
   int result = servoDriver.setPWM(channelsRotation[cameraNum], 0, newPulseWidth);
   if (LOG_ENABLED && result != 0) {
     Serial.println("Log:Received nonzero result: " + String(result) + " from PWM set on pca motor: " + String(channelsRotation[cameraNum]));

@@ -18,13 +18,20 @@ void Display::showThermal (Camera* camera) {
   int resHeight = camera->getResolutionHeight();
   int resWidth = camera->getResolutionWidth();
 
-  int hotThreshold = 27;
+  int warmThreshold = 27;
+  int hotThreshold = 29;
 
   for (uint8_t h=0; h<resHeight; h++) {
     for (uint8_t w=0; w<resWidth; w++) {
       float t = frame[h*resWidth + w];
       if (t >= hotThreshold) {
         display->drawPixel(48 + w, h, WHITE);
+      }
+      else if (t >= warmThreshold) {
+        // 50/50 chance
+        if (random(0, 100) % 2 == 0) {
+          display->drawPixel(48 + w, h, WHITE);
+        }
       }
     }
   }
