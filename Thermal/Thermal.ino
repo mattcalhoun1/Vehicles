@@ -3,14 +3,16 @@
 #include "Display.h"
 #include "ControlMode.h"
 #include "TestMode.h"
+#include "LoRaTrans.h"
 
 CameraServos* servos;
 Camera* camera;
 Display* display;
 ControlMode* controlMode;
+LoRaTrans* lora;
 
 void setup() {
-  while (!Serial) delay(10);
+  //while (!Serial) delay(10);
   Serial.begin(115200);
   delay(100);
 
@@ -22,8 +24,9 @@ void setup() {
 
   display = new Display();
   camera = new Camera();
+  lora = new LoRaTrans();
 
-  controlMode = new TestMode (display, camera, servos);
+  controlMode = new TestMode (display, camera, servos, lora);
   controlMode->init();
 }
 

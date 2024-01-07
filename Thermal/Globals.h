@@ -4,4 +4,18 @@
 
 #define LOG_ENABLED true
 
+#define LORA_RFM9X_CS 10
+#define LORA_RFM9X_INT 2
+#define LORA_RFM9X_RST 4
+#define LORA_RFM9X_FREQ 915.0
+
+#define LORA_RFM9X_MAX_MESSAGE_LEN 64
+
+#define LORA_ADDR_SELF 1
+#define LORA_ADDR_REMOTE 0
+#define LORA_ADDR_SPOTTER 1
+#define LORA_ADDR_ACTOR 2
+#define LORA_ADDR_BROADCAST 255
+
+
 #endif

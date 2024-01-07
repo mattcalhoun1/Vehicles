@@ -5,7 +5,7 @@
  */
 class TestMode : public ControlMode {
   public:
-    TestMode(Display* _display, Camera* _camera, CameraServos* _servos) : ControlMode(_display, _camera, _servos) {}
+    TestMode(Display* _display, Camera* _camera, CameraServos* _servos, LoRaTrans* _lora) : ControlMode(_display, _camera, _servos, _lora) {}
     virtual void loop ();
     virtual void init ();
     virtual void sleepOrBackground(unsigned long sleepTime);

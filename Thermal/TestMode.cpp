@@ -6,9 +6,10 @@ void TestMode::init() {
 }
 
 void TestMode::loop() {
-  bool testServos = true;
+  bool testServos = false;
   bool testThermal = true;
-
+  bool testLora = true;
+  
   if (testServos) {
     logConsole("Testing servos");
 
@@ -24,8 +25,17 @@ void TestMode::loop() {
     // back to default
     servos->setFrameRelativeRotation(90, CAM_MOUNT_LEFT);
     servos->setFrameRelativeRotation(90, CAM_MOUNT_RIGHT);
-    sleepOrBackground(5000);
   }
+
+  if (testLora) {
+    if (lora->hasMessage()) {
+      logConsole("Lora message available. Retrieving.");
+      int messageLength = lora->retrieveMessage();
+      logConsole("Received " + String(messageLength) + " length message");
+    }
+    lora->send("Here is a message", LORA_ADDR_REMOTE);
+  }
+  sleepOrBackground(5000);
 }
 
 void TestMode::sleepOrBackground(unsigned long sleepTime) {
