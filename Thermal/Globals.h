@@ -12,6 +12,11 @@
 //#define LORA_RFM9X_MAX_MESSAGE_LEN 64
 #define LORA_RFM9X_MAX_MESSAGE_LEN 128
 #define LORA_MAX_CHUNK_SIZE 100 // leave 28 bytes for metadata
+#define LORA_MAX_CHUNK_IN_BUFFER_SIZE 1024 // max size allowed for any chunk bunch
+#define LORA_MAX_CHUNK_TIME_MILLIS 8000 // max time to wait for all chunks to arrive
+
+#define LORA_CHUNK_START_KEY "CHUNKSTART"
+#define LORA_CHUNK_END_KEY "CHUNKEND:"
 
 #define LORA_ADDR_SELF 1
 #define LORA_ADDR_REMOTE 0

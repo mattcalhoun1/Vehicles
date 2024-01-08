@@ -129,7 +129,7 @@ bool LoRaTrans::send(uint8_t *message, int length, uint8_t address) {
 
     // send the chunk end notice with checksum if chunking
     if (chunking) {
-      unsigned long checksum = 0;
+      long checksum = 0;
       for (int i = 0; i < length; i++) {
         checksum += message[i];
       }
@@ -154,34 +154,148 @@ bool LoRaTrans::endChunking(int address, unsigned long checksum) {
   return send("CHUNKEND:" + String(checksum), address);
 }
 
-uint8_t LoRaTrans::retrieveMessage() {
+long LoRaTrans::extractBufferChecksum () {
+  String sChecksum = String((char*)buf).substring(strlen(LORA_CHUNK_END_KEY));
+  return strtoul(sChecksum.c_str(), NULL, 10);
+  //return sChecksum.to;
+}
+
+long LoRaTrans::calculateChunkInBufferChecksum () {
+  long checksum = 0;
+  for (int i = 0; i < chunkInBufferSize; i++) {
+    checksum += chunkInBuffer[i];
+  }
+  return checksum;
+}
+
+long LoRaTrans::retrieveMessage() {
   uint8_t data[] = "  OK";
 
-  // Wait for a message addressed to us from the client
   uint8_t len = sizeof(buf);
   uint8_t from;
   if (rfm9x_manager->recvfromAck(buf, &len, &from))
   {
     buf[len] = 0;
-    logConsole("got request from : 0x", false);
+    logConsole("received message from : 0x", false);
     logConsole(from, false, HEX);
     logConsole(": ", false);
     logConsole((char*)buf);
-    logConsole("RSSI: ", false); logConsole(rfm9x->lastRssi(), true, DEC);
+    //logConsole("RSSI: ", false); logConsole(rfm9x->lastRssi(), true, DEC);
 
     // echo last button
-    data[0] = buf[8];
+    //data[0] = buf[8];
     // Send a reply back to the originator client
     if (!rfm9x_manager->sendtoWait(data, sizeof(data), from)) {
-      Serial.println("sendtoWait failed");
+      logConsole("sendtoWait failed");
       return 0;
     }
 
-    return len;
-  }
+    if (strcmp((char*)buf, LORA_CHUNK_START_KEY) == 0) {
+      logConsole("Chunking begin...");
 
+
+      // Copy this message to the beginning of the buffer
+      chunkInBufferSize = 0;
+      //logConsole("Adding first set to chunk buffer");
+      //appendBufferToChunked (len);
+      //logConsole("Added to chunk buffer, waiting for more...");
+
+      // Try to keep receiving messages until we hit the chunk end
+      bool chunkingEnded = false;
+      bool checksumMatched = false;
+      unsigned long chunkStartTime = millis();
+      while (chunkingEnded == false && chunkInBufferSize < LORA_MAX_CHUNK_IN_BUFFER_SIZE && (millis() - chunkStartTime) < LORA_MAX_CHUNK_TIME_MILLIS) {
+        if (hasMessage()) {
+          // Get the next message, assuming it's part of this stream. 
+          // if we receive a message from another sender during this 
+          // chunking, throw it out. maybe later i will fix this
+          len = sizeof(buf);
+          uint8_t chunkFrom;
+          if (rfm9x_manager->recvfromAck(buf, &len, &chunkFrom))
+          {
+            if (!rfm9x_manager->sendtoWait(data, sizeof(data), from)) {
+              logConsole("sendtoWait failed");
+              return 0;
+            }
+
+
+            if (chunkFrom == from) {
+              buf[len] = 0;
+
+              // check if this is the chunk end
+              if (strlen(LORA_CHUNK_END_KEY) <= strlen((char*)buf) && (strncmp(LORA_CHUNK_END_KEY,(char*)buf,strlen(LORA_CHUNK_END_KEY)) == 0 )) {
+                long providedChecksum = extractBufferChecksum();
+                long calculatedChecksum = calculateChunkInBufferChecksum();
+                checksumMatched = providedChecksum = calculatedChecksum;
+                chunkingEnded = true;
+                //logConsole("Chunk ended! Provided checksum: " + String(checksum) + ", Calculated checksum: " + String(calculateChunkInBufferChecksum()));
+              }
+              else {
+                appendBufferToChunked (len);                
+                logConsole("received another chunk from : 0x", false);
+                logConsole(", chunked buffer size: " + String(chunkInBufferSize));
+              }
+            }
+            else {
+              logConsole("Received message from separate sender while chunking. This message will have to be resent.");
+            }
+          }
+          else {
+            logConsole("Failed to receive/acknowledge a chunk while chunking!");
+          }
+        }
+        else {
+            delay(50); // sleep for a while
+        }
+      }
+
+      if (chunkingEnded && checksumMatched) {
+        logConsole("Complete chunked message size: " + String(chunkInBufferSize));
+        chunkInBufferTime = millis();
+        return chunkInBufferSize;
+      }
+      else {
+        logConsole("Chunking was not complete!");
+        return 0;
+      }
+    }
+    else {
+      messageBufferTime = millis();
+      return len;
+    }
+  }
+  else {
+    logConsole("Failed to receive or acknowledge message");
+  }
   return 0;
 }
+
+void LoRaTrans::appendBufferToChunked (int chunkSize) {
+  int msgBufferLoc = 0;
+  for (int chunkLoc = chunkInBufferSize; chunkLoc < (chunkInBufferSize + chunkSize); chunkLoc++) {
+    chunkInBuffer[chunkLoc] = buf[msgBufferLoc];
+    msgBufferLoc++;
+  }
+  chunkInBufferSize += chunkSize;
+}
+
+uint8_t* LoRaTrans::getChunkInBuffer () {
+  return chunkInBuffer;
+}
+
+int LoRaTrans::getChunkInBufferSize() {
+  return chunkInBufferSize;
+}
+
+
+unsigned long LoRaTrans::getChunkInBufferTime () {
+  return chunkInBufferTime;
+}
+
+unsigned long LoRaTrans::getMessageBufferTime () {
+  return messageBufferTime;
+}
+
 
 void LoRaTrans::reset () {
     // manual reset
