@@ -3,6 +3,7 @@
 #include "Display.h"
 #include "ControlMode.h"
 #include "TestMode.h"
+#include "WatchMode.h"
 #include "LoRaTrans.h"
 
 CameraServos* servos;
@@ -26,7 +27,7 @@ void setup() {
   camera = new Camera();
   lora = new LoRaTrans();
 
-  controlMode = new TestMode (display, camera, servos, lora);
+  controlMode = new WatchMode (display, camera, servos, lora);
   controlMode->init();
 }
 

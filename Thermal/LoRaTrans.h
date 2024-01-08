@@ -18,7 +18,7 @@ class LoRaTrans {
     bool broadcast (String message);
     bool broadcast(uint8_t *message, uint8_t length);
     bool send (String message, int address);
-    bool send(uint8_t *message, uint8_t length, uint8_t address);
+    bool send(uint8_t *message, int length, uint8_t address);
     int getLastRssi ();
 
   private:
@@ -26,5 +26,10 @@ class LoRaTrans {
     RH_RF95* rfm9x;
     RHReliableDatagram* rfm9x_manager;
     uint8_t buf[LORA_RFM9X_MAX_MESSAGE_LEN];
+    void logConsole(String msg);
+    void logConsole(String msg, bool newline);
+    void logConsole(int msg, bool newline, int base);
+    bool endChunking(int address, unsigned long checksum);
+    bool beginChunking(int address);
 };
 #endif

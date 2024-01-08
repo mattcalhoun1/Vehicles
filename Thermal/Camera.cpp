@@ -19,13 +19,13 @@ Camera::Camera() {
 
 
 bool Camera::captureImage () {
-  logConsole("Capturing thermal image");
+  //logConsole("Capturing thermal image");
   if (mlx.getFrame(frame) != 0) {
     logConsole("Image capture failed");
     return false;
   }
 
-  logConsole("Image captured");
+  //logConsole("Image captured");
   return true;
 }
 
