@@ -1,5 +1,7 @@
 #include "ControlMode.h"
 #include "ThermalEncoder.h"
+#include "Commander.h"
+#include "LoRaCommander.h"
 
 /**
  * This mode is for watching an area for activity
@@ -22,5 +24,9 @@ class WatchMode : public ControlMode {
     int defaultRightRotation = 120;
     int minRotations[2] = {-140,0};
     int maxRotations[2] = {0,140};
+
+    CommandResult executeCommand (Command command);
+
     ThermalEncoder encoder = ThermalEncoder(THERMAL_HEIGHT, THERMAL_WIDTH, false);
+    Commander* loraCommander;
 };

@@ -71,6 +71,10 @@ int LoRaTrans::getLastRssi() {
   return rfm9x->lastRssi();
 }
 
+int LoRaTrans::getLastSender() {
+  return lastSender;
+}
+
 bool LoRaTrans::send(uint8_t *message, int length, uint8_t address) {
 
   logConsole("Sending ", false); logConsole(String(length), false); logConsole(" to ", false); logConsole(String(address));
@@ -178,6 +182,7 @@ long LoRaTrans::retrieveMessage() {
     buf[len] = 0;
     logConsole("received message from : 0x", false);
     logConsole(from, false, HEX);
+    this->lastSender = from;
     logConsole(": ", false);
     logConsole((char*)buf);
     //logConsole("RSSI: ", false); logConsole(rfm9x->lastRssi(), true, DEC);

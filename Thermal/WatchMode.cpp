@@ -10,23 +10,50 @@ void WatchMode::init() {
   captureThermal[CAM_MOUNT_LEFT] = false;
   captureThermal[CAM_MOUNT_RIGHT] = true;
 
+  loraCommander = new LoRaCommander(lora, LORA_ADDR_REMOTE);
+  loraCommander->init();
+
   //delay(500);
 }
+
+CommandResult WatchMode::executeCommand (Command command) {
+  logConsole("Executing " + String(command.getId()));
+  return Success;
+}
+
 
 void WatchMode::loop() {
   sleepOrBackground(1000);
   
   if (loraEnabled) {
+    // Check for any commands or pings received via lora
+    Command loraCommand = loraCommander->getNextCommand();
+    if (loraCommand.getCommandType() != Nothing) {
+      // Acknowledge receipt of the command
+      loraCommander->sendReceipt(loraCommand, Ok);
+
+      // Execute the command
+      CommandResult result = executeCommand(loraCommand);
+
+      // send the result
+      loraCommander->sendResult(loraCommand, result);
+    }
+
+    /*
     if (lora->hasMessage()) {
       logConsole("Lora message available. Retrieving.");
       int messageLength = lora->retrieveMessage();
       logConsole("Received LORA message: " + String((char*)lora->getMessageBuffer()));
+
+
     }
     //lora->send("Here is a message", LORA_ADDR_REMOTE);
+    */
 
     // ping the remote occasionally, if configured
     if (remotePingEnabled) {
-      if (remoteLastPing + remotePingFrequency < millis()) {
+      loraCommander->sendPing();
+      /*if (remoteLastPing + remotePingFrequency < millis()) {
         remoteLastPing = millis();
         if(encoder.encode(camera->getImageData())) {
           logConsole("Sending encoded image size " + String(encoder.getEncodedBufferLength()));
@@ -37,7 +64,7 @@ void WatchMode::loop() {
         else {
           logConsole("Image encoding failed");
         }
-      }
+      }*/
     }
   }
   sleepOrBackground(4000);
