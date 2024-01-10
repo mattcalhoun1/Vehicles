@@ -14,9 +14,10 @@ class LoRaCommander : public Commander {
     bool isConnected();
     unsigned long lastConnected();
     Command getNextCommand ();
+    Command extractCommand (String rawCommand, int sender);
     void sendResult (Command command, CommandResult result);
     void sendReceipt (Command command, ReceiptResult result);
-    void sendDistances (unsigned long frontLeft, unsigned long frontRight, unsigned long rearLeft, unsigned long rearRight);
+    void sendCommand (Command command);
     void sendPing();
 
   private:

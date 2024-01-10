@@ -18,12 +18,32 @@ void WatchMode::init() {
 
 CommandResult WatchMode::executeCommand (Command command) {
   logConsole("Executing " + String(command.getId()));
+
+
+  if (command.getCommandType() == GetThermal) {
+    return sendThermal(command.getParams().toInt());
+  }
+
   return Success;
 }
 
 
+CommandResult WatchMode::sendThermal (int cameraId) {
+  if(encoder.encode(camera->getImageData())) {
+    logConsole("Sending encoded image size " + String(encoder.getEncodedBufferLength()));
+    // Send a ping
+    lora->send(encoder.getEncodeDecodeBuffer(), encoder.getEncodedBufferLength(), LORA_ADDR_REMOTE);
+    logConsole("image sent");
+    return Success;
+  }
+  else {
+    logConsole("Image encoding failed");
+    return Fail;
+  }
+}
+
 void WatchMode::loop() {
-  sleepOrBackground(1000);
+  sleepOrBackground(100);
   
   if (loraEnabled) {
     // Check for any commands or pings received via lora
@@ -67,7 +87,7 @@ void WatchMode::loop() {
       }*/
     }
   }
-  sleepOrBackground(4000);
+  sleepOrBackground(100);
 }
 
 void WatchMode::sleepOrBackground(unsigned long sleepTime) {

@@ -10,6 +10,7 @@
 #define CMD_CAMERA_PAN "CAMPAN"
 #define CMD_CAMERA_TILT "CAMTILT"
 #define CMD_DISPLAY "DISPLAY"
+#define CMD_UNKNOWN "UNKNOWN"
 
 #define CMD_RESULT "RESULT" // for giving result of command
 #define CMD_RECEIPT "RECEIPT" // for confirming receipt of a message
@@ -20,7 +21,10 @@ enum CommandType {
   CameraPan =2,
   CameraTilt = 3,
   DisplayText = 4,
-  Nothing = 5
+  Nothing = 5,
+  Unknown = 6,
+  Receipt = 7,
+  Result = 8
 };
 
 enum CommandResult {
@@ -43,11 +47,14 @@ class Command {
     long getId ();
     void setSender(int sender);
     int getSender ();
+    void setRecipient(int recipient);
+    int getRecipient ();
   protected:
     CommandType commandType;
     String params;
     long id;
     int sender;
+    int recipient;
 };
 
 class Commander {
@@ -56,9 +63,13 @@ class Commander {
     virtual bool isConnected() = 0;
     virtual unsigned long lastConnected() = 0;
     virtual Command getNextCommand () = 0;
+    virtual Command extractCommand (String rawCommand, int sender) = 0;
     virtual void sendResult (Command command, CommandResult result) = 0;
     virtual void sendReceipt (Command command, ReceiptResult result) = 0;
+    virtual void sendCommand (Command command) = 0;
     virtual void sendPing() = 0;
+    String getCommandName (CommandType commandType);
+    CommandType getCommandType (String commandName);
     void logConsole(String str);
 };
 #endif

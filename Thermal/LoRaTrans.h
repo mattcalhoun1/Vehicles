@@ -22,6 +22,8 @@ class LoRaTrans {
     bool broadcast(uint8_t *message, uint8_t length);
     bool send (String message, int address);
     bool send(uint8_t *message, int length, uint8_t address);
+    bool fireAndForget (String message, int address);
+    bool fireAndForget(uint8_t *message, int length, uint8_t address);
     int getLastRssi ();
     unsigned long getChunkInBufferTime ();
     unsigned long getMessageBufferTime ();

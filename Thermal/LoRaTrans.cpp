@@ -1,12 +1,14 @@
 #include "LoRaTrans.h"
 
-LoRaTrans::LoRaTrans () {
+LoRaTrans::LoRaTrans() {
   logConsole("rfm9x...");
   rfm9x = new RH_RF95(LORA_RFM9X_CS, LORA_RFM9X_INT);
   delay(500);
   logConsole("rfm9x ok");
   logConsole("reliability manager...");
   rfm9x_manager = new RHReliableDatagram(*rfm9x, LORA_ADDR_SELF);
+  //rfm9x_manager->setTimeout(1000);
+  //rfm9x_manager->setRetries(5);  
   logConsole("reliability manager ok");
 
   logConsole("reset output pinmode");
@@ -28,7 +30,8 @@ LoRaTrans::LoRaTrans () {
 
   if (!rfm9x_manager->init()) {
     logConsole("RFM9X radio init failed");
-    while (1);
+    while (1)
+      ;
   }
   logConsole("RFM9X radio init OK!");
 
@@ -42,15 +45,16 @@ LoRaTrans::LoRaTrans () {
   // ishighpowermodule flag set like this:
   rfm9x->setTxPower(14, true);
 
-  logConsole("RFM9X radio @", false);  logConsole(String(LORA_RFM9X_FREQ), false);  logConsole(" MHz");
-
+  logConsole("RFM9X radio @", false);
+  logConsole(String(LORA_RFM9X_FREQ), false);
+  logConsole(" MHz");
 }
 
 bool LoRaTrans::hasMessage() {
-   return rfm9x_manager->available();
+  return rfm9x_manager->available();
 }
 
-uint8_t* LoRaTrans::getMessageBuffer () {
+uint8_t* LoRaTrans::getMessageBuffer() {
   return buf;
 }
 
@@ -58,9 +62,12 @@ bool LoRaTrans::broadcast(String message) {
   return broadcast((uint8_t*)message.c_str(), message.length());
 }
 
-bool LoRaTrans::broadcast(uint8_t *message, uint8_t length) {
-    logConsole("Broadcasting ", false); logConsole(String(length), false); logConsole(" to ", false); logConsole(String(LORA_ADDR_BROADCAST));
-    return rfm9x_manager->sendtoWait(message, length, LORA_ADDR_BROADCAST);
+bool LoRaTrans::broadcast(uint8_t* message, uint8_t length) {
+  logConsole("Broadcasting ", false);
+  logConsole(String(length), false);
+  logConsole(" to ", false);
+  logConsole(String(LORA_ADDR_BROADCAST));
+  return rfm9x_manager->sendtoWait(message, length, LORA_ADDR_BROADCAST);
 }
 
 bool LoRaTrans::send(String message, int address) {
@@ -75,9 +82,27 @@ int LoRaTrans::getLastSender() {
   return lastSender;
 }
 
-bool LoRaTrans::send(uint8_t *message, int length, uint8_t address) {
+bool LoRaTrans::fireAndForget(String message, int address) {
+  return fireAndForget((uint8_t*)message.c_str(), message.length(), address);
+}
 
-  logConsole("Sending ", false); logConsole(String(length), false); logConsole(" to ", false); logConsole(String(address));
+bool LoRaTrans::fireAndForget(uint8_t* message, int length, uint8_t address) {
+
+  logConsole("Firing ", false);
+  logConsole(String(length), false);
+  logConsole(" to ", false);
+  logConsole(String(address));
+
+  return rfm9x_manager->sendto(message, length, address);
+}
+
+
+bool LoRaTrans::send(uint8_t* message, int length, uint8_t address) {
+
+  logConsole("Sending ", false);
+  logConsole(String(length), false);
+  logConsole(" to ", false);
+  logConsole(String(address));
 
   // if necessary break apart the message into multiples
   int sent = 0;
@@ -94,8 +119,7 @@ bool LoRaTrans::send(uint8_t *message, int length, uint8_t address) {
       if (!chunkNoticeSent) {
         retries++;
       }
-    }
-    else {
+    } else {
       // if this is the last chunk, the chunk size might be smaller
       if (length - sent < chunkSize) {
         chunkSize = length - sent;
@@ -105,23 +129,29 @@ bool LoRaTrans::send(uint8_t *message, int length, uint8_t address) {
         // Now wait for a reply from the server
         uint8_t len = sizeof(buf);
         uint8_t from;
-        if (rfm9x_manager->recvfromAckTimeout(buf, &len, 2000, &from)) {
+        /*if (rfm9x_manager->recvfromAckTimeout(buf, &len, LORA_ACK_TIMEOUT, &from)) {
           buf[len] = 0; // terminate the buffer
           logConsole("Got reply from #", false);
           logConsole(from, false, DEC); logConsole(": ", false);
           logConsole((char*)buf);
+        }*/
 
-          // on to the next chunk
-          sent += chunkSize;
-          logConsole("Sent ", false); logConsole(sent, false, DEC); logConsole(" of ", false); logConsole(length, true, DEC);
-        }
+        // Get response
+
+
+        // on to the next chunk
+        sent += chunkSize;
+        logConsole("Sent ", false);
+        logConsole(sent, false, DEC);
+        logConsole(" of ", false);
+        logConsole(length, true, DEC);
+        /*}
         else {
           logConsole("Acknowledgement not received!");
           retries += 1;
-        }
-      }
-      else {
-        logConsole("Message not sent!");
+        }*/
+      } else {
+        //logConsole("Message not sent!");
         retries += 1;
       }
     }
@@ -141,8 +171,7 @@ bool LoRaTrans::send(uint8_t *message, int length, uint8_t address) {
         logConsole("Chunk end notice failed!");
       }
     }
-  }
-  else {
+  } else {
     logConsole("Send failed");
   }
 
@@ -158,13 +187,13 @@ bool LoRaTrans::endChunking(int address, unsigned long checksum) {
   return send("CHUNKEND:" + String(checksum), address);
 }
 
-long LoRaTrans::extractBufferChecksum () {
+long LoRaTrans::extractBufferChecksum() {
   String sChecksum = String((char*)buf).substring(strlen(LORA_CHUNK_END_KEY));
   return strtoul(sChecksum.c_str(), NULL, 10);
   //return sChecksum.to;
 }
 
-long LoRaTrans::calculateChunkInBufferChecksum () {
+long LoRaTrans::calculateChunkInBufferChecksum() {
   long checksum = 0;
   for (int i = 0; i < chunkInBufferSize; i++) {
     checksum += chunkInBuffer[i];
@@ -177,8 +206,7 @@ long LoRaTrans::retrieveMessage() {
 
   uint8_t len = sizeof(buf);
   uint8_t from;
-  if (rfm9x_manager->recvfromAck(buf, &len, &from))
-  {
+  if (rfm9x_manager->recvfromAckTimeout(buf, &len, LORA_ACK_TIMEOUT, &from)) {
     buf[len] = 0;
     logConsole("received message from : 0x", false);
     logConsole(from, false, HEX);
@@ -190,10 +218,11 @@ long LoRaTrans::retrieveMessage() {
     // echo last button
     //data[0] = buf[8];
     // Send a reply back to the originator client
-    if (!rfm9x_manager->sendtoWait(data, sizeof(data), from)) {
-      logConsole("sendtoWait failed");
-      return 0;
-    }
+
+    /*if (!rfm9x_manager->sendtoWait(data, sizeof(data), from)) {
+      logConsole("retrieveMessage -> sendtoWait failed");
+      //return 0;
+    }*/
 
     if (strcmp((char*)buf, LORA_CHUNK_START_KEY) == 0) {
       logConsole("Chunking begin...");
@@ -211,46 +240,41 @@ long LoRaTrans::retrieveMessage() {
       unsigned long chunkStartTime = millis();
       while (chunkingEnded == false && chunkInBufferSize < LORA_MAX_CHUNK_IN_BUFFER_SIZE && (millis() - chunkStartTime) < LORA_MAX_CHUNK_TIME_MILLIS) {
         if (hasMessage()) {
-          // Get the next message, assuming it's part of this stream. 
-          // if we receive a message from another sender during this 
+          // Get the next message, assuming it's part of this stream.
+          // if we receive a message from another sender during this
           // chunking, throw it out. maybe later i will fix this
           len = sizeof(buf);
           uint8_t chunkFrom;
-          if (rfm9x_manager->recvfromAck(buf, &len, &chunkFrom))
-          {
-            if (!rfm9x_manager->sendtoWait(data, sizeof(data), from)) {
+          if (rfm9x_manager->recvfromAckTimeout(buf, &len, LORA_ACK_TIMEOUT, &chunkFrom)) {
+            /*if (!rfm9x_manager->sendtoWait(data, sizeof(data), chunkFrom)) {
               logConsole("sendtoWait failed");
               return 0;
-            }
+            }*/
 
 
             if (chunkFrom == from) {
               buf[len] = 0;
 
               // check if this is the chunk end
-              if (strlen(LORA_CHUNK_END_KEY) <= strlen((char*)buf) && (strncmp(LORA_CHUNK_END_KEY,(char*)buf,strlen(LORA_CHUNK_END_KEY)) == 0 )) {
+              if (strlen(LORA_CHUNK_END_KEY) <= strlen((char*)buf) && (strncmp(LORA_CHUNK_END_KEY, (char*)buf, strlen(LORA_CHUNK_END_KEY)) == 0)) {
                 long providedChecksum = extractBufferChecksum();
                 long calculatedChecksum = calculateChunkInBufferChecksum();
                 checksumMatched = providedChecksum = calculatedChecksum;
                 chunkingEnded = true;
                 //logConsole("Chunk ended! Provided checksum: " + String(checksum) + ", Calculated checksum: " + String(calculateChunkInBufferChecksum()));
-              }
-              else {
-                appendBufferToChunked (len);                
+              } else {
+                appendBufferToChunked(len);
                 logConsole("received another chunk from : 0x", false);
                 logConsole(", chunked buffer size: " + String(chunkInBufferSize));
               }
-            }
-            else {
+            } else {
               logConsole("Received message from separate sender while chunking. This message will have to be resent.");
             }
-          }
-          else {
+          } else {
             logConsole("Failed to receive/acknowledge a chunk while chunking!");
           }
-        }
-        else {
-            delay(50); // sleep for a while
+        } else {
+          delay(50);  // sleep for a while
         }
       }
 
@@ -258,24 +282,21 @@ long LoRaTrans::retrieveMessage() {
         logConsole("Complete chunked message size: " + String(chunkInBufferSize));
         chunkInBufferTime = millis();
         return chunkInBufferSize;
-      }
-      else {
+      } else {
         logConsole("Chunking was not complete!");
         return 0;
       }
-    }
-    else {
+    } else {
       messageBufferTime = millis();
       return len;
     }
-  }
-  else {
+  } else {
     logConsole("Failed to receive or acknowledge message");
   }
   return 0;
 }
 
-void LoRaTrans::appendBufferToChunked (int chunkSize) {
+void LoRaTrans::appendBufferToChunked(int chunkSize) {
   int msgBufferLoc = 0;
   for (int chunkLoc = chunkInBufferSize; chunkLoc < (chunkInBufferSize + chunkSize); chunkLoc++) {
     chunkInBuffer[chunkLoc] = buf[msgBufferLoc];
@@ -284,7 +305,7 @@ void LoRaTrans::appendBufferToChunked (int chunkSize) {
   chunkInBufferSize += chunkSize;
 }
 
-uint8_t* LoRaTrans::getChunkInBuffer () {
+uint8_t* LoRaTrans::getChunkInBuffer() {
   return chunkInBuffer;
 }
 
@@ -293,17 +314,17 @@ int LoRaTrans::getChunkInBufferSize() {
 }
 
 
-unsigned long LoRaTrans::getChunkInBufferTime () {
+unsigned long LoRaTrans::getChunkInBufferTime() {
   return chunkInBufferTime;
 }
 
-unsigned long LoRaTrans::getMessageBufferTime () {
+unsigned long LoRaTrans::getMessageBufferTime() {
   return messageBufferTime;
 }
 
 
-void LoRaTrans::reset () {
-    // manual reset
+void LoRaTrans::reset() {
+  // manual reset
   logConsole("Resetting LoRa...");
   digitalWrite(LORA_RFM9X_RST, LOW);
   delay(10);
@@ -312,28 +333,26 @@ void LoRaTrans::reset () {
   logConsole("LoRa successfully reset.");
 }
 
-void LoRaTrans::logConsole (String msg, bool newline) {
+void LoRaTrans::logConsole(String msg, bool newline) {
   if (LOG_ENABLED) {
     if (newline) {
       Serial.println(msg);
-    }
-    else {
+    } else {
       Serial.print(msg);
     }
   }
 }
 
-void LoRaTrans::logConsole (int msg, bool newline, int base) {
+void LoRaTrans::logConsole(int msg, bool newline, int base) {
   if (LOG_ENABLED) {
     if (newline) {
       Serial.println(msg, base);
-    }
-    else {
+    } else {
       Serial.print(msg, base);
     }
   }
 }
 
-void LoRaTrans::logConsole (String msg) {
+void LoRaTrans::logConsole(String msg) {
   logConsole(msg, true);
 }

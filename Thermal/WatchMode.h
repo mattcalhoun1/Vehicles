@@ -15,7 +15,7 @@ class WatchMode : public ControlMode {
 
   private:
     bool loraEnabled = true;
-    bool remotePingEnabled = true;
+    bool remotePingEnabled = false;
     long remotePingFrequency = 30000; // every 30 sec
     unsigned long remoteLastPing = 0;
     bool captureThermal[2];
@@ -26,6 +26,7 @@ class WatchMode : public ControlMode {
     int maxRotations[2] = {0,140};
 
     CommandResult executeCommand (Command command);
+    CommandResult sendThermal (int cameraId);
 
     ThermalEncoder encoder = ThermalEncoder(THERMAL_HEIGHT, THERMAL_WIDTH, false);
     Commander* loraCommander;

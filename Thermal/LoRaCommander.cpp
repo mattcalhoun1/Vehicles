@@ -56,9 +56,53 @@ bool LoRaCommander::isCompleteCommand(String msg) {
   else if (cmd.equalsIgnoreCase(CMD_DISPLAY)) {
     return true;
   }
+  else if (cmd.equalsIgnoreCase(CMD_RESULT)) {
+    return true;
+  }
+  else if (cmd.equalsIgnoreCase(CMD_RECEIPT)) {
+    return true;
+  }
   return false;
 }
 
+Command LoRaCommander::extractCommand(String rawCommand, int sender) {
+  String command = rawCommand;
+  if (isCompleteCommand(rawCommand)) {
+    String params = "";
+    long id = 0;
+    int delim = rawCommand.indexOf(delimiterCmd);
+
+    if (delim != -1) {
+      params = rawCommand.substring(delim+1);
+      params.trim();
+      id = atol(rawCommand.substring(rawCommand.indexOf(delimiterId)+1, rawCommand.indexOf(delimiterCmd)).c_str());
+      command = rawCommand.substring(0, rawCommand.indexOf(delimiterId));
+    }
+
+    CommandType cmdType = getCommandType(command);
+    Command cmd;
+    cmd.setCommandType(cmdType);
+    cmd.setParams(params);
+    cmd.setId(id);
+    cmd.setSender(sender);
+    if (cmdType != Unknown) {
+      return cmd;
+    }
+    else {
+      logConsole("Unknown command " + command);
+    }
+  }
+  else {
+    logConsole("Received invalid formatted command " + command);
+  }
+
+  // Notify we are ready
+  //sendPing();
+
+  Command nullCommand;
+  nullCommand.setCommandType(Nothing);
+  return nullCommand;
+}
 
 Command LoRaCommander::receiveCommand () {
   // If there is room in the queue, check for another command
@@ -69,73 +113,17 @@ Command LoRaCommander::receiveCommand () {
     String command = String((char*)lora->getMessageBuffer());
     int sender = lora->getLastSender();
 
-    if (isCompleteCommand(command)) {
-      String params = "";
-      long id = 0;
-      int delim = command.indexOf(delimiterCmd);
-
-      if (delim != -1) {
-        params = command.substring(delim+1);
-        params.trim();
-        id = atol(command.substring(command.indexOf(delimiterId)+1, command.indexOf(delimiterCmd)).c_str());
-        command = command.substring(0, command.indexOf(delimiterId));
-      }
-
-      if (command.equalsIgnoreCase(CMD_PING)) {
-        Command cmd;
-        cmd.setCommandType(Ping);
-        cmd.setParams(params);
-        cmd.setId(id);
-        cmd.setSender(sender);
-        return cmd;
-      }
-      else if (command.equalsIgnoreCase(CMD_GET_THERMAL)) {
-        Command cmd;
-        cmd.setCommandType(GetThermal);
-        cmd.setParams(params);
-        cmd.setId(id);
-        cmd.setSender(sender);
-        return cmd;
-      }
-      else if (command.equalsIgnoreCase(CMD_CAMERA_PAN)) {
-        Command cmd;
-        cmd.setCommandType(CameraPan);
-        cmd.setParams(params);
-        cmd.setId(id);
-        cmd.setSender(sender);
-        return cmd;
-      }
-      else if (command.equalsIgnoreCase(CMD_CAMERA_TILT)) {
-        Command cmd;
-        cmd.setCommandType(CameraTilt);
-        cmd.setParams(params);
-        cmd.setId(id);
-        cmd.setSender(sender);
-        return cmd;
-      }
-      else if (command.equalsIgnoreCase(CMD_DISPLAY)) {
-        Command cmd;
-        cmd.setCommandType(DisplayText);
-        cmd.setParams(params);
-        cmd.setId(id);
-        cmd.setSender(sender);
-        return cmd;
-      }
-      else {
-        logConsole("Unknown command " + command);
-      }
-    }
-    else {
-      logConsole("Received invalid formatted command " + command);
-    }
+    return extractCommand(command, sender);
   }
-
-  // Notify we are ready
-  //sendPing();
 
   Command nullCommand;
   nullCommand.setCommandType(Nothing);
   return nullCommand;
+}
+
+void LoRaCommander::sendCommand(Command command) {
+  String commandMsg = String(getCommandName(command.getCommandType()) + String(delimiterId) + String(command.getId()) + String(delimiterCmd) + String(command.getParams()));
+  lora->send(commandMsg, command.getRecipient());
 }
 
 void LoRaCommander::sendReceipt (Command command, ReceiptResult result) {
