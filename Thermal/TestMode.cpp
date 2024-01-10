@@ -43,7 +43,10 @@ void TestMode::sleepOrBackground(unsigned long sleepTime) {
   while (start + sleepTime > millis()) {
     if (testThermal) {
       camera->captureImage();
-      display->showThermal(camera);
+      int xOffset = 32;
+      int yOffset = 0;
+      display->showThermal(camera->getImageData(), camera->getResolutionHeight(), camera->getResolutionWidth(), xOffset, yOffset);
+
     }
     delay(100);
   }

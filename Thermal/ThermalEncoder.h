@@ -14,6 +14,7 @@ class ThermalEncoder {
     float* interpolate (float* image, int interpolatedHeight, int interpolatedWidth);
     int getInterpolatedBufferLength ();
     float* getInterpolatedBuffer ();
+    float* getInterpolatedRow (float* image, int projectedRow);
 
   private:
     int resolutionHeight;
@@ -23,6 +24,13 @@ class ThermalEncoder {
     uint8_t encodeBuffer[THERMAL_ENCODE_BUFFER_SIZE];
     int interpolatedBufferLength = 0;
     int encodedBufferLength = 0;
+
+    void setInterpolatedBufferValue (int row, int col, float value);
+    float getInterpolatedBufferValue (int row, int col);
+    float getIntBufferPerimiterAverageSquare (int row, int col);
+    float getIntBufferPerimiterAverageDiamond (int row, int col);
+    void logInterpolationBuffer ();
+
 };
 
 #endif

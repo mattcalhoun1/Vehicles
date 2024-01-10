@@ -1,6 +1,7 @@
 #include "CameraServos.h"
 #include "Camera.h"
 #include "Display.h"
+#include "Display_1331.h"
 #include "ControlMode.h"
 #include "TestMode.h"
 #include "WatchMode.h"
@@ -23,7 +24,7 @@ void setup() {
   servos->init(startingRotations, startingTilts);
   logConsole("Servos initialized.");
 
-  display = new Display();
+  display = new Display_1331();
   camera = new Camera();
   lora = new LoRaTrans();
 

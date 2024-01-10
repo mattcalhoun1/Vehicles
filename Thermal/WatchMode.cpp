@@ -13,6 +13,7 @@ void WatchMode::init() {
   loraCommander = new LoRaCommander(lora, LORA_ADDR_REMOTE);
   loraCommander->init();
 
+  display->clear();
   //delay(500);
 }
 
@@ -59,32 +60,9 @@ void WatchMode::loop() {
       loraCommander->sendResult(loraCommand, result);
     }
 
-    /*
-    if (lora->hasMessage()) {
-      logConsole("Lora message available. Retrieving.");
-      int messageLength = lora->retrieveMessage();
-      logConsole("Received LORA message: " + String((char*)lora->getMessageBuffer()));
-
-
-    }
-    //lora->send("Here is a message", LORA_ADDR_REMOTE);
-    */
-
     // ping the remote occasionally, if configured
     if (remotePingEnabled) {
       loraCommander->sendPing();
-      /*if (remoteLastPing + remotePingFrequency < millis()) {
-        remoteLastPing = millis();
-        if(encoder.encode(camera->getImageData())) {
-          logConsole("Sending encoded image size " + String(encoder.getEncodedBufferLength()));
-          // Send a ping
-          lora->send(encoder.getEncodeDecodeBuffer(), encoder.getEncodedBufferLength(), LORA_ADDR_REMOTE);
-          logConsole("image sent");
-        }
-        else {
-          logConsole("Image encoding failed");
-        }
-      }*/
     }
   }
   sleepOrBackground(100);
@@ -95,7 +73,20 @@ void WatchMode::sleepOrBackground(unsigned long sleepTime) {
   while (start + sleepTime > millis()) {
     if (captureThermal[CAM_MOUNT_RIGHT]) {
       camera->captureImage();
-      display->showThermal(camera);
+      int xOffset = 12;
+      int yOffset = 0;
+      //display->clear();
+      //display->showThermal(camera->getImageData(), camera->getResolutionHeight(), camera->getResolutionWidth(), xOffset, yOffset);
+
+      //#define THERMAL_INTERPOLATED_WIDTH 64
+      //#define THERMAL_INTERPOLATED_HEIGHT 48
+
+      // interpolate
+      for (int r = 0; r < THERMAL_INTERPOLATED_HEIGHT; r++) {
+        float* interpolatedRow = encoder.getInterpolatedRow(camera->getImageData(), r);
+        display->showInterpolatedThermalRow(interpolatedRow, xOffset, r + yOffset);
+      }
+     
     }
     delay(100);
   }

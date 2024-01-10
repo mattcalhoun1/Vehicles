@@ -1,26 +1,38 @@
-#include <Adafruit_SSD1306.h>
-#include <Adafruit_GFX.h>
+#include <Arduino.h>
 #include "Globals.h"
-#include "Camera.h"
-
-#define OLED_ADDR   0x3C
-
-// 128 x 32 pixel display
-#if (SSD1306_LCDHEIGHT != 32)
-#error("Height incorrect, please fix Adafruit_SSD1306.h!");
-#endif
-
 
 #ifndef DISPLAY_H
 #define DISPLAY_H
+enum TextSize {
+  TextSmall = 1,
+  TextMedium = 2,
+  TextLarge = 3
+};
+
+enum DisplayColor {
+  Black = 0,
+  Blue = 1,
+  Red = 2,
+  Green = 3,
+  Cyan = 4,
+  Magenta = 5,
+  Yellow = 6,
+  White = 7
+};
+
 class Display {
   public:
-    Display ();
-    void showThermal (Camera* camera);
-    void clear ();
+    virtual void showThermal (float* frame, int resHeight, int resWidth, int xOffset, int yOffset) = 0;
+    virtual void showThermal (uint8_t* frame, int resHeight, int resWidth, int xOffset, int yOffset) = 0;
+    virtual void showInterpolatedThermalRow (float* interpolatedRow, int xOffset, int yOffset) = 0;
+    virtual void showText (String text, int x, int y, TextSize size) = 0;
+    virtual void showSymbol (int gfxChar, int x, int y) = 0;
+    virtual void showText (String text, int x, int y, TextSize size, DisplayColor color) = 0;
+    virtual void showSymbol (int gfxChar, int x, int y, DisplayColor color) = 0;
+    virtual void clear () = 0;
+    virtual void repaint () = 0;
 
-  private:
+  protected:
     void logConsole (String msg);
-    Adafruit_SSD1306* display = new  Adafruit_SSD1306(-1);  // -1 = no reset pin, reset pin not used on 4-pin OLED module    
 };
 #endif
