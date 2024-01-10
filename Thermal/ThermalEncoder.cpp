@@ -39,24 +39,14 @@ uint8_t* ThermalEncoder::getEncodeDecodeBuffer () {
   return encodeBuffer;
 }
 
-float* ThermalEncoder::getInterpolatedBuffer () {
-  return interpolationBuffer;
-}
-
-float* ThermalEncoder::interpolate (float* image, int interpolatedHeight, int interpolatedWidth) {
-  return image;
-}
-
 int ThermalEncoder::getEncodedBufferLength () {
   return encodedBufferLength;
 }
 
-int ThermalEncoder::getInterpolatedBufferLength () {
-  return interpolatedBufferLength;
-}
-
-float* ThermalEncoder::getInterpolatedRow (float* image, int projectedRow) {
-  // if the projected row is evenly divided, we already have half the pixels
+// identical to uint8 version, just needed different pointer type
+// maybe can refactor these down somehow
+void ThermalEncoder::primeInterpolationBuffer (float* image, int projectedRow) {
+  // if the projected row is an even row, we already have half the pixels
   // if it's odd, we have no rows of the pixel
 
   // -1 means unknown or not yet calculated
@@ -83,10 +73,67 @@ float* ThermalEncoder::getInterpolatedRow (float* image, int projectedRow) {
     intBufferCol = 0;
     intBufferRow++;
   }
+}
 
-  // next pass, for each row that is fully empty (indicated by -1 in col zero, based on how above is implemented)
-  intBufferRow = 0;
-  intBufferCol = 1;
+// identical to float version, just needed different pointer type
+// maybe can refactor these down somehow
+void ThermalEncoder::primeInterpolationBuffer (uint8_t* image, int projectedRow) {
+  // if the projected row is an even row, we already have half the pixels
+  // if it's odd, we have no rows of the pixel
+
+  // -1 means unknown or not yet calculated
+  //  first copy in all the data we know
+  int intBufferRow = 0;
+  int intBufferCol = 0;
+  for (int currProjRow = projectedRow - 1; currProjRow <= projectedRow + 1; currProjRow++) {
+    for (int currProjCol = 0; currProjCol < THERMAL_INTERPOLATED_WIDTH; currProjCol++) {
+      // if this is an even (projected) row, copy the data straight over
+      if (currProjRow % 2 == 0 && currProjRow < THERMAL_INTERPOLATED_HEIGHT) {
+        if (currProjCol % 2 == 0) {
+          setInterpolatedBufferValue(intBufferRow, intBufferCol, image[(resolutionWidth * (currProjRow / 2)) + (currProjCol / 2)]);
+        }
+        else {
+          setInterpolatedBufferValue(intBufferRow, intBufferCol, -1);
+        }
+      }
+      else {
+          setInterpolatedBufferValue(intBufferRow, intBufferCol, -1);
+      }
+      intBufferCol++;
+    }
+    //Serial.println("");
+    intBufferCol = 0;
+    intBufferRow++;
+  }
+}
+
+float* ThermalEncoder::getInterpolatedRow (uint8_t* image, int projectedRow) {
+  primeInterpolationBuffer(image, projectedRow);
+
+  completePrimedInterpolationBuffer();
+
+
+  // the middle row is the one requested
+  return interpolationBuffer + THERMAL_INTERPOLATED_WIDTH;
+}
+
+float* ThermalEncoder::getInterpolatedRow (float* image, int projectedRow) {
+  // Copy the known values into the interpolation projection
+  // -1 means unknown or not yet calculated
+  primeInterpolationBuffer(image, projectedRow);
+
+  completePrimedInterpolationBuffer();
+
+  // the middle row is the one requested
+  return interpolationBuffer + THERMAL_INTERPOLATED_WIDTH;
+}
+
+void ThermalEncoder::completePrimedInterpolationBuffer () {
+
+  // first pass on primed buffer,
+  // for each row that is fully empty (indicated by -1 in col zero, based on how priming was implemented)
+  int intBufferRow = 0;
+  int intBufferCol = 1;
   for (int currProjRow = 0; currProjRow < 3; currProjRow++) {
     if (getInterpolatedBufferValue(intBufferRow, 0) == -1) {
       // start with second pixel, where we have the most surrounding information
@@ -109,9 +156,6 @@ float* ThermalEncoder::getInterpolatedRow (float* image, int projectedRow) {
       setInterpolatedBufferValue(intBufferRow, currProjCol, getIntBufferPerimiterAverageDiamond(intBufferRow, currProjCol));
     }
   }
-
-  // the middle row is the one requested
-  return interpolationBuffer + THERMAL_INTERPOLATED_WIDTH;
 }
 
 void ThermalEncoder::logInterpolationBuffer () {
